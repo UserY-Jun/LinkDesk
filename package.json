@@ -4,12 +4,13 @@
   "description": "Android 设备投屏工具",
   "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
-    "dev": "electron . --debug",
-    "build": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux"
+    "build:renderer": "esbuild src/js/app.js --bundle --outfile=src/dist/bundle.js --format=esm --sourcemap",
+    "start": "npm run build:renderer && electron .",
+    "dev": "npm run build:renderer && electron . --debug",
+    "build": "npm run build:renderer && electron-builder",
+    "build:win": "npm run build:renderer && electron-builder --win",
+    "build:mac": "npm run build:renderer && electron-builder --mac",
+    "build:linux": "npm run build:renderer && electron-builder --linux"
   },
   "keywords": [
     "scrcpy",
@@ -20,37 +21,41 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@yume-chan/adb": "^2.6.4",
+    "@yume-chan/adb-scrcpy": "^2.3.2",
+    "@yume-chan/adb-server-node-tcp": "^2.5.2",
+    "@yume-chan/scrcpy": "^2.3.0",
+    "@yume-chan/scrcpy-decoder-webcodecs": "^2.5.3",
+    "@yume-chan/stream-extra": "^2.6.1",
     "fs-extra": "^11.1.1"
   },
   "devDependencies": {
     "asar": "^3.2.0",
     "electron": "^35.1.4",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.28.2"
   },
   "build": {
     "appId": "com.electron.scrcpy",
     "productName": "Android投屏助手",
     "files": [
-      "**/*",
-      "!dist{,/**/*}",
-      "!dist-fixed{,/**/*}",
-      "!scrcpy-electron/resources{,/**/*}"
+      "src/**/*",
+      "package.json"
     ],
     "directories": {
-      "buildResources": "scrcpy-electron/resources",
+      "buildResources": "resources",
       "output": "release"
     },
     "win": {
       "target": "nsis",
       "extraResources": [
         {
-          "from": "scrcpy-electron/resources/scrcpy/win64",
-          "to": "scrcpy/win64",
-          "filter": ["**/*"]
+          "from": "resources/scrcpy-server",
+          "to": "scrcpy-server"
         },
         {
-          "from": "scrcpy-electron/resources/scrcpy/win32",
-          "to": "scrcpy/win32",
+          "from": "resources/bin/win64",
+          "to": "bin/win64",
           "filter": ["**/*"]
         }
       ]
@@ -60,13 +65,17 @@
       "category": "public.app-category.developer-tools",
       "extraResources": [
         {
-          "from": "scrcpy-electron/resources/scrcpy/mac-x64",
-          "to": "scrcpy/mac-x64",
+          "from": "resources/scrcpy-server",
+          "to": "scrcpy-server"
+        },
+        {
+          "from": "resources/bin/mac-arm64",
+          "to": "bin/mac-arm64",
           "filter": ["**/*"]
         },
         {
-          "from": "scrcpy-electron/resources/scrcpy/mac-arm64",
-          "to": "scrcpy/mac-arm64",
+          "from": "resources/bin/mac-x64",
+          "to": "bin/mac-x64",
           "filter": ["**/*"]
         }
       ]
@@ -79,8 +88,12 @@
       "category": "Development",
       "extraResources": [
         {
-          "from": "scrcpy-electron/resources/scrcpy/linux",
-          "to": "scrcpy/linux",
+          "from": "resources/scrcpy-server",
+          "to": "scrcpy-server"
+        },
+        {
+          "from": "resources/bin/linux",
+          "to": "bin/linux",
           "filter": ["**/*"]
         }
       ]

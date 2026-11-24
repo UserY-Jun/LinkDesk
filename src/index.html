@@ -1,278 +1,170 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Android投屏助手</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LinkDesk · Android 设备工作台</title>
+  <link rel="stylesheet" href="css/console.css">
 </head>
 <body>
-  <!-- 动态背景 -->
-  <div class="bg-waves">
-    <div class="wave"></div>
-    <div class="wave"></div>
-    <div class="wave"></div>
-  </div>
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="icon-brand" viewBox="0 0 32 32"><path fill="#7784ff" d="M3 8.5A4.5 4.5 0 0 1 7.5 4H20v6H9v12H3z"/><path fill="#bdc5ff" d="M12 22h11V10h6v13.5a4.5 4.5 0 0 1-4.5 4.5H12z"/><path fill="#fff" d="M12 13h8v6h-8z"/></symbol>
+<symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+<symbol id="icon-monitor" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M12 17v4m-4 0h8"/></symbol>
+<symbol id="icon-folder" viewBox="0 0 24 24"><path d="M3 7V5a1 1 0 0 1 1-1h5l2 3h9a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Zm0 2h18"/></symbol>
+<symbol id="icon-settings" viewBox="0 0 24 24"><path d="M4 6h6m4 0h6M4 12h10m4 0h2M4 18h2m4 0h10"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></symbol>
+<symbol id="icon-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.2.9-1.5 1.3-1.5 2.6M12 16.5h.01"/></symbol>
+<symbol id="icon-phone" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2.6"/><path d="M10 5h4m-3.5 14h3"/></symbol>
+<symbol id="icon-wifi" viewBox="0 0 24 24"><path d="M2 9a16 16 0 0 1 20 0M5 12.5a11 11 0 0 1 14 0m-11 3.2a6 6 0 0 1 8 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></symbol>
+<symbol id="icon-usb" viewBox="0 0 24 24"><path d="M9 3v4m6-4v4M7 7h10v3a5 5 0 0 1-10 0V7Zm5 8v6"/></symbol>
+<symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5"/><path d="M4.8 9a7.6 7.6 0 0 1 13-3L20 9m-.8 6a7.6 7.6 0 0 1-13 3L4 15"/></symbol>
+<symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+<symbol id="icon-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="icon-up" viewBox="0 0 24 24"><path d="M12 20V4m-7 7 7-7 7 7"/></symbol>
+<symbol id="icon-upload" viewBox="0 0 24 24"><path d="M12 15V3m-5 5 5-5 5 5M4 15v5h16v-5"/></symbol>
+<symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></symbol>
+<symbol id="icon-trash" viewBox="0 0 24 24"><path d="M3 6h18m-13 0V3h8v3M6 6l1 15h10l1-15m-8 4v7m4-7v7"/></symbol>
+<symbol id="icon-file" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6zM14 3v6h5"/></symbol>
+<symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="icon-min" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="icon-max" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></symbol>
+<symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="icon-power" viewBox="0 0 24 24"><path d="M12 3v9M7 6a8 8 0 1 0 10 0"/></symbol>
+<symbol id="icon-camera" viewBox="0 0 24 24"><path d="m8 6 2-3h4l2 3h4v14H4V6z"/><circle cx="12" cy="12.5" r="3.5"/></symbol>
+<symbol id="icon-expand" viewBox="0 0 24 24"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5"/></symbol>
+<symbol id="icon-detach" viewBox="0 0 24 24"><path d="M14 3h7v7m0-7L11 13M10 5H4v15h15v-7"/></symbol>
+<symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+</defs></svg>
 
-  <div class="window-drag-top"></div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><svg class="icon" aria-hidden="true"><use href="#icon-brand"/></svg><span>LinkDesk</span></div>
+    <nav aria-label="工作空间">
+      <button data-page="devices" aria-current="page"><svg class="icon" aria-hidden="true"><use href="#icon-grid"/></svg> 设备总览</button>
+      <button data-page="mirror"><svg class="icon" aria-hidden="true"><use href="#icon-monitor"/></svg> 屏幕投控<span id="liveDot" hidden></span></button>
+      <button data-page="files"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg> 文件管理</button>
+      <button data-page="settings"><svg class="icon" aria-hidden="true"><use href="#icon-settings"/></svg> 偏好设置</button>
+    </nav>
+    <div class="side-foot"><button id="openHelp"><svg class="icon" aria-hidden="true"><use href="#icon-help"/></svg> 连接指南</button></div>
+  </aside>
 
-  <div class="app-container">
-    <!-- 标题栏 -->
-    <div class="title-bar" id="titleBar">
-      <div class="title-bar-left">
-        <div class="title-bar-icon">
-          <i class="ri-android-line"></i>
-        </div>
-        <div class="title-bar-title">
-          <h1>Android投屏助手</h1>
-        </div>
+  <header id="titleBar" class="titlebar">
+    <span class="context"><svg class="icon" aria-hidden="true"><use href="#icon-monitor"/></svg> 本机工作空间</span>
+    <div class="titlebar-interactive device-switch"><label for="devicePicker">当前设备</label><select id="devicePicker"><option value="">未选择设备</option></select></div>
+    <div class="window-controls titlebar-interactive">
+      <button id="windowMinimizeBtn" aria-label="最小化"><svg class="icon" aria-hidden="true"><use href="#icon-min"/></svg></button><button id="windowMaximizeBtn" aria-label="最大化或还原"><svg class="icon" aria-hidden="true"><use href="#icon-max"/></svg></button><button id="windowCloseBtn" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+    </div>
+  </header>
+
+  <main class="workspace">
+    <section id="viewDevices" class="page">
+      <header class="page-head"><h1>设备总览</h1><button id="refreshDevicesBtn" class="btn"><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg> 刷新设备</button></header>
+      <div class="connect-banner">
+        <div><h2>连接 Android 设备</h2><p>通过 USB 或 Wi-Fi 连接手机，开始投屏与文件传输。</p>
+        <div class="buttons"><button id="openWireless" class="btn bright"><svg class="icon" aria-hidden="true"><use href="#icon-wifi"/></svg> 无线连接</button><button class="btn ghost" data-help><svg class="icon" aria-hidden="true"><use href="#icon-help"/></svg> 连接指南</button></div></div>
+        <img src="assets/connection.svg" alt="" draggable="false">
       </div>
-
-      <div class="title-bar-right">
-        <div class="control-buttons titlebar-interactive">
-          <button id="refreshDevicesBtn" class="btn btn-secondary btn-icon tooltip" data-tooltip="刷新设备">
-            <i class="ri-refresh-line"></i>
-          </button>
-        </div>
-
-        <div class="window-controls titlebar-interactive" aria-label="窗口控制">
-          <button id="windowMinimizeBtn" class="window-control-btn" aria-label="最小化">
-            <i class="ri-subtract-line"></i>
-          </button>
-          <button id="windowMaximizeBtn" class="window-control-btn" aria-label="最大化/还原">
-            <i class="ri-checkbox-blank-line"></i>
-          </button>
-          <button id="windowCloseBtn" class="window-control-btn window-close" aria-label="关闭">
-            <i class="ri-close-line"></i>
-          </button>
-        </div>
+      <section class="panel devices-panel"><header class="panel-head"><h2>设备列表 <span id="deviceCount" class="count">0</span></h2></header>
+        <div id="usbDeviceList"></div><div id="wirelessDeviceList"></div>
+        <div id="waitingDevices" class="empty"><span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#icon-phone"/></svg></span><strong id="waitingTitle">正在查找设备…</strong><p>使用数据线连接手机，或从上方添加无线设备。</p></div>
+      </section>
+      <div class="shortcuts">
+        <button data-go="mirror"><span class="tile-icon violet"><svg class="icon" aria-hidden="true"><use href="#icon-monitor"/></svg></span><span><strong>屏幕投控</strong><small>查看和控制手机画面</small></span><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
+        <button data-go="files"><span class="tile-icon teal"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg></span><span><strong>文件管理</strong><small>浏览手机存储，双向传输文件</small></span><svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></button>
       </div>
-    </div>
+    </section>
 
-    <div class="app-shell">
-      <nav class="app-nav" aria-label="主导航">
-        <button class="nav-item" type="button" data-view="devices" aria-current="page">
-          <i class="ri-usb-line" aria-hidden="true"></i>
-          <span>设备</span>
-        </button>
-        <button class="nav-item" type="button" data-view="mirroring">
-          <i class="ri-cast-line" aria-hidden="true"></i>
-          <span>投屏</span>
-        </button>
-        <button class="nav-item" type="button" data-view="help">
-          <i class="ri-question-line" aria-hidden="true"></i>
-          <span>帮助</span>
-        </button>
-      </nav>
+    <section id="viewMirroring" class="page mirror-page" hidden>
+      <header class="page-head"><h1>屏幕投控</h1><div class="buttons"><button class="btn" data-go="settings"><svg class="icon" aria-hidden="true"><use href="#icon-settings"/></svg> 投屏设置</button><button id="startMirroringBtn" class="btn primary">开始投屏</button><button id="stopMirroringBtn" class="btn danger" hidden>停止投屏</button></div></header>
+      <section class="panel mirror-panel"><header class="panel-head"><h2 id="currentDeviceTitle">设备画面</h2><span id="mirrorState" class="pill">待连接</span></header>
+        <div id="mirroringStageContainer" class="stage-host"><div id="screenStage" class="screen-stage">
+          <div id="screenWrapper" class="screen-wrapper"><canvas id="screenCanvas" class="screen-canvas" width="720" height="1560" tabindex="0"></canvas>
+            <div id="screenPlaceholder" class="screen-placeholder"><svg class="icon" aria-hidden="true"><use href="#icon-phone"/></svg><strong id="mirrorHint">尚未选择设备</strong></div>
+          </div>
+          <fieldset id="androidNavigation" aria-label="Android 系统导航" disabled>
+            <button id="btnNavBack" title="返回" aria-label="返回"><svg viewBox="0 0 24 24"><path d="M17 4 5 12l12 8z"/></svg></button>
+            <button id="btnNavHome" title="主屏幕" aria-label="主屏幕"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg></button>
+            <button id="btnNavAppSwitch" title="最近任务" aria-label="最近任务"><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></svg></button>
+          </fieldset>
+          <fieldset id="virtualNavbar" aria-label="投屏工具" disabled>
+            <button id="btnNavPower" title="电源或锁屏" aria-label="电源或锁屏"><svg class="icon" aria-hidden="true"><use href="#icon-power"/></svg></button>
+            <button id="btnNavVolDown" title="降低音量" aria-label="降低音量"><svg class="icon" aria-hidden="true"><use href="#icon-min"/></svg></button><button id="btnNavVolUp" title="提高音量" aria-label="提高音量"><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></button>
+            <button id="btnNavScreenshot" title="截屏" aria-label="截屏"><svg class="icon" aria-hidden="true"><use href="#icon-camera"/></svg></button>
+            <button id="detachScreen" title="独立窗口" aria-label="独立窗口" disabled><svg class="icon" aria-hidden="true"><use href="#icon-detach"/></svg></button>
+            <button id="btnNavFullscreen" title="视口全屏" aria-label="视口全屏"><svg class="icon" aria-hidden="true"><use href="#icon-expand"/></svg></button>
+          </fieldset>
+        </div><button id="dockScreen" class="btn" hidden>将画面移回主窗口</button></div>
+      </section>
+    </section>
 
-      <main class="app-main">
-        <div class="workspace-header">
-          <div class="workspace-title">
-            <h2 id="currentDeviceTitle">未连接设备</h2>
-          </div>
-          <div class="workspace-actions">
-            <button id="stopMirroringBtn" class="btn btn-error" disabled>
-              <i class="ri-stop-circle-line"></i> 停止投屏
-            </button>
-          </div>
+    <section id="viewFiles" class="page" hidden>
+      <header class="page-head"><h1>文件管理</h1><button id="fileUpload" class="btn primary" disabled><svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg> 上传到手机</button></header>
+      <div id="fileNoDevice" class="panel empty tall"><span class="empty-icon"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg></span><strong>尚未选择设备</strong><p>连接并选择一台手机，即可浏览内部共享存储。</p><button class="btn" data-go="devices">前往设备总览</button></div>
+      <div id="fileWorkspace" hidden>
+        <section class="panel file-panel">
+          <header class="file-path"><button id="folderUp" class="icon-btn" title="上一级" aria-label="上一级"><svg class="icon" aria-hidden="true"><use href="#icon-up"/></svg></button><nav id="breadcrumbs" aria-label="文件路径"></nav><button id="fileRefresh" class="icon-btn" title="刷新目录" aria-label="刷新目录"><svg class="icon" aria-hidden="true"><use href="#icon-refresh"/></svg></button></header>
+          <div class="file-tools"><div class="buttons"><button id="newFolder" class="btn"><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg> 新建文件夹</button><button id="fileDownload" class="btn" disabled><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg> 下载</button><button id="fileDelete" class="btn danger" disabled><svg class="icon" aria-hidden="true"><use href="#icon-trash"/></svg> 删除</button></div><label class="search"><svg class="icon" aria-hidden="true"><use href="#icon-search"/></svg><input id="fileSearch" type="search" placeholder="搜索当前目录" aria-label="搜索当前目录"></label></div>
+          <div class="table-wrap"><table><thead><tr><th><input id="selectAll" type="checkbox" aria-label="选择全部可见项目"></th><th>名称</th><th>大小</th><th>修改时间</th></tr></thead><tbody id="fileRows"></tbody></table></div>
+          <div class="file-empty" id="fileEmpty" role="status"></div><footer id="fileSummary" class="table-footer"></footer>
+        </section>
+      </div>
+      <div id="fileActivity" class="panel activity" role="status" hidden><strong id="activityTitle"></strong><progress id="activityProgress"></progress><div id="activityDetails"></div></div>
+    </section>
+
+    <section id="viewSettings" class="page settings-page" hidden>
+      <header class="page-head"><h1>偏好设置</h1><button class="btn" id="resetSettings">恢复默认设置</button></header>
+      <section id="mirroringOptions" class="panel"><header class="panel-head"><h2><svg class="icon" aria-hidden="true"><use href="#icon-monitor"/></svg> 投屏画面</h2><small>下次投屏生效</small></header>
+        <div class="setting-row"><span>画质预设</span><div class="segments"><button data-quality="640,2M,30">省流</button><button data-quality="1280,4M,30">均衡</button><button data-quality="1920,8M,60">高清</button></div></div>
+        <div class="setting-grid">
+          <label>最长边分辨率<select id="maxResolution"><option value="640">640 px</option><option value="960">960 px</option><option value="1280" selected>1280 px</option><option value="1920">1920 px</option></select></label>
+          <label>视频比特率<select id="bitRate"><option>1M</option><option>2M</option><option selected>4M</option><option>8M</option></select></label>
+          <label>帧率上限<select id="maxFps"><option>15</option><option>24</option><option selected>30</option><option>60</option></select></label>
+          <label>画面方向<select id="rotation"><option value="0">跟随设备</option><option value="1">锁定 0°</option><option value="2">锁定 90°</option></select></label>
         </div>
-
-        <section id="viewDevices" class="view" data-active-view="devices">
-          <div id="noDeviceMsg" class="alert alert-warning">
-            <div class="alert-icon"><i class="ri-error-warning-line"></i></div>
-            <div class="alert-content">
-              <p>未检测到连接的设备。请通过 USB 连接您的 Android 设备，或使用 WiFi 方式连接。</p>
-              <p>如果您是首次使用，请确保：</p>
-              <ul style="margin-left: 20px; margin-top: 10px;">
-                <li>设备已开启 USB 调试模式</li>
-                <li>已授权当前计算机进行调试</li>
-                <li>对于无线连接，设备需与电脑处于同一局域网</li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="grid-2">
-            <div class="card">
-              <div class="card-header">
-                <h2 class="card-title">USB 设备</h2>
-                <div class="card-actions">
-                  <button id="refreshUsbBtn" class="btn btn-secondary btn-icon" aria-label="刷新USB设备">
-                    <i class="ri-refresh-line"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-content">
-                <div id="usbDeviceList" class="device-list-root">
-                  <div class="loading">
-                    <div class="loading-spinner"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <h2 class="card-title">WiFi 连接</h2>
-                <div class="card-actions">
-                  <button id="refreshWirelessBtn" class="btn btn-secondary btn-icon" aria-label="刷新WiFi设备">
-                    <i class="ri-refresh-line"></i>
-                  </button>
-                </div>
-              </div>
-              <div class="card-content">
-                <div class="form-group">
-                  <label for="deviceIp" class="form-label">设备 IP 地址</label>
-                  <div class="form-row">
-                    <input type="text" id="deviceIp" class="form-control" placeholder="例如: 192.168.1.100">
-                    <button id="connectWifiBtn" class="btn btn-primary">连接</button>
-                  </div>
-                </div>
-                <div id="wirelessDeviceList" class="device-list-root">
-                  <div class="loading">
-                    <div class="loading-spinner"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="alert alert-info">
-            <div class="alert-icon"><i class="ri-information-line"></i></div>
-            <div class="alert-content">
-              <strong>提示：</strong> 本应用仅支持 Android 设备，不支持 iOS 设备。
-            </div>
-          </div>
-        </section>
-
-        <section id="viewMirroring" class="view" data-active-view="mirroring" hidden>
-          <div id="mirroringOptions" class="card" hidden>
-            <div class="card-header">
-              <h3 class="card-title">投屏选项</h3>
-            </div>
-            <div class="card-content">
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">最大分辨率</label>
-                  <select id="maxResolution" class="form-control">
-                    <option value="1920">1920×1080 (Full HD)</option>
-                    <option value="1280" selected>1280×720 (HD)</option>
-                    <option value="960">960×540</option>
-                    <option value="640">640×360</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">比特率</label>
-                  <select id="bitRate" class="form-control">
-                    <option value="8M">8 Mbps (高质量)</option>
-                    <option value="4M" selected>4 Mbps (推荐)</option>
-                    <option value="2M">2 Mbps (流畅)</option>
-                    <option value="1M">1 Mbps (低带宽)</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">帧率上限</label>
-                  <select id="maxFps" class="form-control">
-                    <option value="60">60 FPS</option>
-                    <option value="30" selected>30 FPS</option>
-                    <option value="24">24 FPS</option>
-                    <option value="15">15 FPS</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label class="form-label">屏幕方向</label>
-                  <select id="rotation" class="form-control">
-                    <option value="0" selected>自动</option>
-                    <option value="1">竖屏</option>
-                    <option value="2">横屏</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-checkbox">
-                  <input type="checkbox" id="stayAwake" checked>
-                  <span>保持设备屏幕常亮</span>
-                </label>
-              </div>
-              <div class="form-group">
-                <label class="form-checkbox">
-                  <input type="checkbox" id="showTouches" checked>
-                  <span>显示触摸点</span>
-                </label>
-              </div>
-              <div class="form-group">
-                <label class="form-label">设备解锁</label>
-                <div class="form-row">
-                  <input type="password" id="unlockPassword" class="form-control" placeholder="输入解锁密码">
-                  <button id="unlockDeviceBtn" class="btn btn-accent">
-                    <i class="ri-lock-unlock-line"></i> 解锁设备
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="card-footer">
-              <button id="startMirroringBtn" class="btn btn-primary">
-                <i class="ri-cast-line"></i> 开始投屏
-              </button>
-            </div>
-          </div>
-
-          <div id="deviceInfo" class="card" hidden>
-            <div class="card-header">
-              <h3 class="card-title">设备信息</h3>
-            </div>
-            <div class="card-content" id="deviceInfoContent"></div>
-          </div>
-
-          <div class="empty-state" id="mirroringEmpty">
-            <div class="empty-icon"><i class="ri-device-line" aria-hidden="true"></i></div>
-            <div class="empty-title">先选择一个设备</div>
-            <div class="empty-desc">在“设备”页选择已连接的设备后，再配置投屏选项。</div>
-            <button class="btn btn-secondary" type="button" data-jump-view="devices">
-              去选择设备
-            </button>
-          </div>
-        </section>
-
-        <section id="viewHelp" class="view" data-active-view="help" hidden>
-          <div id="connectionHelp" class="card">
-            <div class="card-header">
-              <h3 class="card-title">连接帮助</h3>
-            </div>
-            <div class="card-content">
-              <h4>USB 连接</h4>
-              <ol>
-                <li>使用 USB 数据线连接设备到电脑</li>
-                <li>在设备上启用「开发者选项」和「USB 调试」</li>
-                <li>在弹出的授权对话框中允许 USB 调试</li>
-                <li>点击刷新按钮检测设备</li>
-              </ol>
-              
-              <h4>WiFi 连接 (无线)</h4>
-              <ol>
-                <li>首先通过 USB 连接设备</li>
-                <li>点击设备旁边的「启用 WiFi」按钮</li>
-                <li>等待设备 IP 获取完成，然后可以断开 USB 线</li>
-                <li>点击「连接」建立无线连接</li>
-              </ol>
-              
-              <p><strong>注意：</strong> 无线连接要求设备和电脑在同一局域网内。</p>
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <!-- 状态栏 -->
-    <div id="statusBar" class="status-bar">
-      <div id="statusMessage" class="status-message"></div>
-    </div>
-  </div>
-
-  <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- 脚本 -->
-  <script type="module" src="js/app.js"></script>
-</body>
-</html>
+        <label class="setting-row">投屏时保持设备常亮<input class="switch" type="checkbox" id="stayAwake" checked></label>
+        <label class="setting-row">在手机上显示触摸位置<input class="switch" type="checkbox" id="showTouches" checked></label>
+        <label class="setting-row">结束投屏时关闭手机屏幕<input class="switch" type="checkbox" id="powerOffOnClose"></label>
+      </section>
+      <section class="panel"><header class="panel-head"><h2><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg> 文件与设备</h2></header>
+        <label class="setting-row">截屏保存方式<select id="screenshotMode"><option value="clipboard">复制到剪贴板</option><option value="file">保存为 PNG 文件</option></select></label>
+        <label class="setting-row">文件管理起始目录<select id="startFolder"><option value="">内部共享存储</option><option value="Download">下载</option><option value="DCIM">相机</option></select></label>
+        <label class="setting-row">文件排序<select id="fileSort"><option value="name">名称</option><option value="modified">最近修改</option><option value="size">大小</option></select></label>
+        <label class="setting-row">显示隐藏文件<input class="switch" type="checkbox" id="hiddenFiles"></label>
+        <label class="setting-row">设备列表自动刷新<select id="refreshInterval"><option value="5">每 5 秒</option><option value="15">每 15 秒</option><option value="0">仅手动刷新</option></select></label>
+      </section>
+      <section id="deviceInfo" class="panel" hidden><header class="panel-head"><h2><svg class="icon" aria-hidden="true"><use href="#icon-phone"/></svg> 当前设备</h2></header><div id="deviceInfoContent"></div>
+        <div class="setting-row"><label for="unlockPassword">设备解锁</label><div class="buttons"><input type="password" id="unlockPassword" placeholder="设备密码" autocomplete="off"><button id="unlockDeviceBtn" class="btn">解锁</button></div></div>
+      </section>
+    </section>
+  </main>
+  <footer class="statusbar"><span class="status-dot"></span><span id="statusMessage" role="status">正在查找设备…</span></footer>
+</div>
+<dialog id="wirelessDialog" aria-labelledby="wirelessTitle"><header><h2 id="wirelessTitle">无线连接</h2><button class="dialog-close" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button></header>
+  <div id="nearbyDevices"></div>
+  <details id="wirelessPairing"><summary>使用配对码配对（Android 11 及以上）</summary><p>无需数据线。在手机「开发者选项 → 无线调试」中打开「使用配对码配对设备」。</p>
+  <form id="pairForm"><label for="pairAddress">配对地址</label><input id="pairAddress" placeholder="192.168.1.100:37001" required>
+  <label for="pairCode">六位配对码</label><div class="form-row"><input id="pairCode" type="password" inputmode="numeric" autocomplete="off" pattern="[0-9]{6}" maxlength="6" required><button class="btn primary">配对</button></div></form></details>
+  <label for="deviceIp">连接地址</label><div class="form-row"><input id="deviceIp" placeholder="手机 IP 或 IP:端口"><button id="connectWifiBtn" class="btn primary">连接</button></div><p id="wirelessFeedback" role="status"></p>
+</dialog>
+<dialog id="viewHelp" aria-labelledby="helpTitle"><header><h2 id="helpTitle">连接指南</h2><button class="dialog-close" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button></header>
+  <h3>先插 USB，再用 Wi-Fi</h3>
+  <ol>
+    <li>手机和电脑接入同一局域网。在手机「开发者选项」中打开「USB 调试」，用数据线连接电脑，并在手机上允许调试。</li>
+    <li>保持插线，在「设备总览」点击这台手机旁的「启用 Wi-Fi」。这一步无需打开手机的「无线调试」，也不用配对码。</li>
+    <li>在弹窗中确认自动填入的手机 IP，点击「连接」。设备列表出现 Wi-Fi 设备后即可拔线。</li>
+  </ol>
+  <p><strong>下次怎么连？</strong> 已启用 Wi-Fi 的手机断线后，可在「无线连接」输入手机当前 IP 重连，默认端口为 5555。如果以前只是插过线，仍需先点「启用 Wi-Fi」；手机重启后通常也要重新插线启用。</p>
+  <h3>不用数据线：无线配对（Android 11 及以上）</h3>
+  <ol>
+    <li>手机和电脑接入同一局域网。在手机「开发者选项 → 无线调试」中选择「使用配对码配对设备」。</li>
+    <li>在本应用打开「无线连接」，选择「使用配对码配对」，输入手机配对弹窗中的地址和六位码。</li>
+    <li>配对后若设备未自动出现，在「连接地址」输入手机<strong>无线调试主页</strong>的 IP 和端口，不要使用配对弹窗的端口。</li>
+  </ol>
+  <h3>只用 USB 数据线</h3>
+  <p>打开「USB 调试」，用数据线连接并允许调试。在「设备总览」点击「刷新设备」，然后选择「投屏」或「文件」。使用期间保持插线即可。</p>
+</dialog>
+<dialog id="folderDialog" aria-labelledby="folderTitle"><header><h2 id="folderTitle">新建文件夹</h2><button class="dialog-close" aria-label="关闭"><svg class="icon" aria-hidden="true"><use href="#icon-close"/></svg></button></header>
+  <form id="folderForm"><label for="folderName">文件夹名称</label><input id="folderName" maxlength="255" required autocomplete="off"><div class="dialog-actions"><button type="button" class="btn dialog-cancel">取消</button><button class="btn primary">创建</button></div></form>
+</dialog>
+<div id="toastRegion" class="toast-region" aria-live="polite"></div>
+<script type="module" src="dist/bundle.js"></script>
+</body></html>

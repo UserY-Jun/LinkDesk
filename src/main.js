@@ -1,20 +1,18 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const fs = require('fs-extra');
 const scrcpyManager = require('./js/scrcpy-manager');
 
-// 保持对窗口对象的全局引用，避免 JavaScript 垃圾回收时窗口被关闭
 let mainWindow;
-let scrcpyProcess = null;
+const MirrorSession = require('./main/mirror-session');
+const mirror = new MirrorSession(scrcpyManager);
 
 function createWindow() {
-  // 创建浏览器窗口
   mainWindow = new BrowserWindow({
-    width: 1180,
-    height: 760,
+    width: 1200,
+    height: 800,
     minWidth: 980,
     minHeight: 640,
-    backgroundColor: '#121212',
+    backgroundColor: '#f5f6fa',
     frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'js', 'preload.js'),
@@ -23,57 +21,61 @@ function createWindow() {
     }
   });
 
-  // 加载应用的入口 HTML 文件
+  let phoneWindow;
+  let resize;
+  mainWindow.webContents.on('will-navigate', event => event.preventDefault());
+  mainWindow.webContents.on('ipc-message', (_event, channel, ratio) => {
+    if (!phoneWindow || phoneWindow.isDestroyed()) return;
+    if (channel === 'phone-display-ratio') resize.fit(ratio);
+    if (channel === 'phone-display-resize' && ratio) resize.pointer(ratio);
+    if (channel === 'phone-display-pin' && typeof ratio === 'boolean') phoneWindow.setAlwaysOnTop(ratio);
+    if (channel === 'phone-display-minimize') phoneWindow.minimize();
+  });
+  mainWindow.webContents.on('did-create-window', child => {
+    phoneWindow = child;
+    resize = require('./main/phone-resize')(child, require('electron').screen);
+  });
+  mainWindow.webContents.setWindowOpenHandler(({ url, frameName }) => {
+    if (url !== 'about:blank' || frameName !== 'phone-display') return { action: 'deny' };
+    return {
+      action: 'allow',
+      overrideBrowserWindowOptions: {
+        title: '手机投屏', width: 390, height: 760, minWidth: 200, minHeight: 140,
+        resizable: false, frame: false, hasShadow: false, roundedCorners: true, transparent: true, alwaysOnTop: false, autoHideMenuBar: true, backgroundColor: '#00000000',
+        webPreferences: { preload: '', contextIsolation: true, nodeIntegration: false }
+      }
+    };
+  });
+
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
-  // 开发环境打开 DevTools
-  // mainWindow.webContents.openDevTools();
-
-  // 当窗口关闭时进行的操作
   mainWindow.on('closed', () => {
-    // 清理进程和引用
-    if (scrcpyProcess) {
-      scrcpyProcess.kill();
-      scrcpyProcess = null;
-    }
+    mirror.stop();
     mainWindow = null;
   });
 }
 
-// 应用初始化完成时创建窗口
 app.whenReady().then(() => {
   createWindow();
-
-  // 设置 IPC 处理
   setupIpcHandlers();
 
-  // macOS 中点击 Dock 图标时, 如果没有其他窗口打开, 则重新创建一个窗口
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// 当所有窗口关闭时退出应用
 app.on('window-all-closed', () => {
-  // 在 macOS 中, 用户通过 Cmd + Q 显式退出之前,
-  // 应用和菜单栏通常会保持活跃状态
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
-// 应用退出前的清理工作
 app.on('will-quit', () => {
-  // 终止任何运行中的进程
-  if (scrcpyProcess) {
-    scrcpyProcess.kill();
-  }
-  
-  // 清理临时文件
-  scrcpyManager.cleanup();
+  mirror.stop();
 });
 
 function setupIpcHandlers() {
+  require('./main/device-files')(scrcpyManager, () => mainWindow);
   ipcMain.handle('window-minimize', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.minimize();
@@ -107,7 +109,7 @@ function setupIpcHandlers() {
     return { success: true };
   });
 
-  // 列出USB设备
+  // 设备列表
   ipcMain.handle('list-usb-devices', async () => {
     try {
       return await scrcpyManager.listUsbDevices();
@@ -117,7 +119,15 @@ function setupIpcHandlers() {
     }
   });
 
-  // 获取设备IP地址
+  ipcMain.handle('list-wireless-devices', async () => {
+    try {
+      return await scrcpyManager.listWirelessDevices();
+    } catch (error) {
+      console.error('Error listing wireless devices:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   ipcMain.handle('get-device-ip', async (event, deviceId) => {
     try {
       const ip = await scrcpyManager.getDeviceIpAddress(deviceId);
@@ -128,7 +138,6 @@ function setupIpcHandlers() {
     }
   });
 
-  // 初始化无线连接
   ipcMain.handle('init-wireless', async (event, deviceId) => {
     try {
       await scrcpyManager.enableTcpipMode(deviceId);
@@ -140,7 +149,17 @@ function setupIpcHandlers() {
     }
   });
 
-  // 连接到无线设备
+  ipcMain.handle('discover-wireless', () => scrcpyManager.discoverWireless());
+
+  ipcMain.handle('pair-wireless', async (_event, { address, code }) => {
+    try {
+      await scrcpyManager.pairWireless(address, code);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  });
+
   ipcMain.handle('connect-wireless', async (event, ip) => {
     try {
       const result = await scrcpyManager.connectOverWifi(ip);
@@ -151,17 +170,6 @@ function setupIpcHandlers() {
     }
   });
 
-  // 列出无线设备
-  ipcMain.handle('list-wireless-devices', async () => {
-    try {
-      return await scrcpyManager.listWirelessDevices();
-    } catch (error) {
-      console.error('Error listing wireless devices:', error);
-      return { success: false, error: error.message };
-    }
-  });
-
-  // 断开无线设备
   ipcMain.handle('disconnect-wireless', async (event, deviceId) => {
     try {
       await scrcpyManager.disconnectDevice(deviceId);
@@ -172,58 +180,30 @@ function setupIpcHandlers() {
     }
   });
 
-  // 启动 scrcpy
-  ipcMain.handle('start-scrcpy', async (event, { deviceId, options = [] }) => {
+  // 启动投屏会话 (基于 @yume-chan/scrcpy)
+  ipcMain.handle('start-scrcpy', (event, config) => mirror.start(event.sender, config));
+  ipcMain.handle('start-scrcpy-wireless', (event, { deviceIp, options }) =>
+    mirror.start(event.sender, { deviceId: deviceIp, options }));
+  ipcMain.handle('stop-scrcpy', () => mirror.stop());
+
+  // 设备控制 IPC 备用通道
+  ipcMain.handle('scrcpy-control', async (event, { action, payload }) => {
     try {
-      // 关闭现有进程
-      if (scrcpyProcess) {
-        scrcpyProcess.kill();
-        scrcpyProcess = null;
+      if (action === 'touch') {
+        await scrcpyManager.injectTouch(payload);
+      } else if (action === 'keycode') {
+        await scrcpyManager.injectKeyCode(payload);
+      } else if (action === 'scroll') {
+        await scrcpyManager.injectScroll(payload);
+      } else if (action === 'back') {
+        await scrcpyManager.pressBackOrTurnOnScreen();
       }
-      
-      // 准备参数
-      const args = deviceId ? ['-s', deviceId, ...options] : options;
-      
-      // 启动 scrcpy
-      scrcpyProcess = await scrcpyManager.runScrcpy(args);
-      
       return { success: true };
     } catch (error) {
-      console.error('Error starting scrcpy:', error);
       return { success: false, error: error.message };
     }
   });
 
-  // 启动无线 scrcpy
-  ipcMain.handle('start-scrcpy-wireless', async (event, { deviceIp, options = [] }) => {
-    try {
-      // 关闭现有进程
-      if (scrcpyProcess) {
-        scrcpyProcess.kill();
-        scrcpyProcess = null;
-      }
-      
-      // 启动无线 scrcpy
-      scrcpyProcess = await scrcpyManager.runScrcpyWireless(deviceIp, options);
-      
-      return { success: true };
-    } catch (error) {
-      console.error('Error starting wireless scrcpy:', error);
-      return { success: false, error: error.message };
-    }
-  });
-
-  // 停止 scrcpy
-  ipcMain.handle('stop-scrcpy', () => {
-    if (scrcpyProcess) {
-      scrcpyProcess.kill();
-      scrcpyProcess = null;
-      return { success: true };
-    }
-    return { success: false, message: 'No running scrcpy process' };
-  });
-
-  // 检查设备是否锁定
   ipcMain.handle('is-device-locked', async (event, deviceId) => {
     try {
       const isLocked = await scrcpyManager.isDeviceLocked(deviceId);
@@ -234,7 +214,6 @@ function setupIpcHandlers() {
     }
   });
 
-  // 解锁设备
   ipcMain.handle('unlock-device', async (event, deviceId, password) => {
     try {
       const unlocked = await scrcpyManager.unlockDevice(deviceId, password);

@@ -27,7 +27,7 @@ function devicesEqual(a, b) {
 
 function renderDeviceRow(device, type, { onSelect, onEnableWifi }) {
   const isOnline = device.status === 'device';
-  const deviceTitle = `${device.id}${device.info && device.info.model ? ` (${device.info.model})` : ''}`;
+  const deviceTitle = device.info?.model?.replaceAll('_', ' ') || device.id;
 
   const row = createElement('div', {
     className: 'device-item',
@@ -35,11 +35,12 @@ function renderDeviceRow(device, type, { onSelect, onEnableWifi }) {
   });
 
   const info = createElement('div', { className: 'device-info' });
+  row.appendChild(createElement('span', { className: 'unit-icon', html: '<svg class="icon" aria-hidden="true"><use href="#icon-phone"/></svg>' }));
   info.appendChild(createElement('div', { className: 'device-name', text: deviceTitle }));
 
   const status = createElement('div', {
     className: `device-status ${isOnline ? 'status-online' : ''}`,
-    text: isOnline ? '已连接' : '未授权或离线'
+    text: [type === 'usb' ? 'USB' : 'Wi-Fi', isOnline ? '已连接' : device.status === 'unauthorized' ? '请在手机上允许调试' : '离线', device.id].join(' · ')
   });
   info.appendChild(status);
   row.appendChild(info);
@@ -47,7 +48,7 @@ function renderDeviceRow(device, type, { onSelect, onEnableWifi }) {
   const actions = createElement('div', { className: 'device-actions' });
 
   if (type === 'usb' && isOnline) {
-    const enableWifiBtn = createElement('button', { className: 'btn btn-accent', text: '启用WiFi' });
+    const enableWifiBtn = createElement('button', { className: 'btn btn-accent', text: '启用 Wi-Fi' });
     enableWifiBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       onEnableWifi(device.id, enableWifiBtn);
@@ -55,9 +56,13 @@ function renderDeviceRow(device, type, { onSelect, onEnableWifi }) {
     actions.appendChild(enableWifiBtn);
   }
 
+  const filesBtn = createElement('button', { className: 'btn', text: '文件' });
+  filesBtn.disabled = !isOnline;
+  filesBtn.onclick = () => onSelect(device.id, type, 'files');
+  actions.appendChild(filesBtn);
   const selectBtn = createElement('button', {
     className: 'btn btn-primary',
-    text: '选择',
+    text: '投屏',
     attrs: { disabled: !isOnline ? 'true' : undefined }
   });
 
@@ -70,11 +75,6 @@ function renderDeviceRow(device, type, { onSelect, onEnableWifi }) {
   actions.appendChild(selectBtn);
   row.appendChild(actions);
 
-  row.addEventListener('click', () => {
-    if (!isOnline) return;
-    onSelect(device.id, type);
-  });
-
   return row;
 }
 
@@ -84,56 +84,35 @@ function highlightSelectedDevice(deviceId) {
   document.querySelectorAll(`.device-item[data-id="${CSS.escape(deviceId)}"]`).forEach((item) => item.classList.add('selected'));
 }
 
-export async function refreshUsbDevices({ usbDeviceListEl, onSelectDevice, onEnableWifi, showLoading = true }) {
-  const { usbDevicesSnapshot } = getState();
-  if (showLoading) {
-    clearElement(usbDeviceListEl);
-    usbDeviceListEl.appendChild(createLoading());
-  }
-
+async function refreshList(type, containerEl, fetchDevices, { onSelectDevice, onEnableWifi, showLoading = true }) {
+  if (showLoading) containerEl.replaceChildren(createLoading());
   try {
-    const devices = await window.androidController.listUsbDevices();
-    const changed = !devicesEqual(usbDevicesSnapshot, devices);
-    if (changed || showLoading) {
-      renderDeviceList({ devices, containerEl: usbDeviceListEl, type: 'usb', onSelectDevice, onEnableWifi });
+    const devices = await fetchDevices();
+    if (!Array.isArray(devices)) throw new Error(devices?.error || '设备列表不可用');
+    const state = getState();
+    if (showLoading || state[type + 'ListError'] || !devicesEqual(state[type + 'DevicesSnapshot'], devices)) {
+      renderDeviceList({ devices, containerEl, type, onSelectDevice, onEnableWifi });
     }
-    setState({ usbDevicesSnapshot: devices });
+    updateSnapshot(type, devices);
+    return true;
   } catch (error) {
-    clearElement(usbDeviceListEl);
-    usbDeviceListEl.appendChild(createAlert({ variant: 'error', message: `获取设备列表失败: ${error.message || String(error)}` }));
+    containerEl.replaceChildren(createAlert({ variant: 'error', message: '无法读取设备列表：' + error.message }));
+    updateSnapshot(type, [], true);
+    return false;
   }
 }
 
-export async function refreshWirelessDevices({ wirelessDeviceListEl, onSelectDevice, onEnableWifi, showLoading = true }) {
-  const { wirelessDevicesSnapshot } = getState();
-  if (showLoading) {
-    clearElement(wirelessDeviceListEl);
-    wirelessDeviceListEl.appendChild(createLoading());
-  }
-
-  try {
-    const devices = await window.androidController.listWirelessDevices();
-    const changed = !devicesEqual(wirelessDevicesSnapshot, devices);
-    if (changed || showLoading) {
-      renderDeviceList({ devices, containerEl: wirelessDeviceListEl, type: 'wireless', onSelectDevice, onEnableWifi });
-    }
-    setState({ wirelessDevicesSnapshot: devices });
-  } catch (error) {
-    clearElement(wirelessDeviceListEl);
-    wirelessDeviceListEl.appendChild(createAlert({ variant: 'error', message: `获取无线设备列表失败: ${error.message || String(error)}` }));
-  }
+export function refreshUsbDevices(options) {
+  return refreshList('usb', options.usbDeviceListEl, () => window.androidController.listUsbDevices(), options);
+}
+export function refreshWirelessDevices(options) {
+  return refreshList('wireless', options.wirelessDeviceListEl, () => window.androidController.listWirelessDevices(), options);
 }
 
 export function renderDeviceList({ devices, containerEl, type, onSelectDevice, onEnableWifi }) {
   clearElement(containerEl);
 
   if (!Array.isArray(devices) || devices.length === 0) {
-    containerEl.appendChild(
-      createAlert({
-        variant: 'info',
-        message: `未检测到${type === 'usb' ? 'USB' : '无线'}设备`
-      })
-    );
     return;
   }
 
@@ -150,10 +129,13 @@ export function renderDeviceList({ devices, containerEl, type, onSelectDevice, o
 
   const { selectedDevice } = getState();
   highlightSelectedDevice(selectedDevice ? selectedDevice.id : null);
-  if (selectedDevice && selectedDevice.type === type) {
-    const existsOnline = Array.isArray(devices) && devices.some((d) => d.id === selectedDevice.id && d.status === 'device');
-    if (!existsOnline) setState({ selectedDevice: null });
-  }
+}
+
+function updateSnapshot(type, devices, failed = false) {
+  const next = { [type + 'DevicesSnapshot']: devices, [type + 'ListError']: failed };
+  const selected = getState().selectedDevice;
+  if (selected?.type === type && !devices.some(d => d.id === selected.id && d.status === 'device')) next.selectedDevice = null;
+  setState(next);
 }
 
 export async function refreshAllDevices({ usbDeviceListEl, wirelessDeviceListEl, onSelectDevice, onEnableWifi, onStatus, showLoading = true }) {
@@ -162,14 +144,15 @@ export async function refreshAllDevices({ usbDeviceListEl, wirelessDeviceListEl,
 
   try {
     setState({ isRefreshingDevices: true });
-    onStatus('正在搜索设备...');
+    if (showLoading) onStatus('正在搜索设备...');
 
-    await Promise.all([
+    const results = await Promise.all([
       refreshUsbDevices({ usbDeviceListEl, onSelectDevice, onEnableWifi, showLoading }),
       refreshWirelessDevices({ wirelessDeviceListEl, onSelectDevice, onEnableWifi, showLoading })
     ]);
 
-    onStatus('设备刷新完成', 'success');
+    if (!results.every(Boolean)) onStatus('无法读取全部设备，请检查连接后刷新', 'error');
+    else if (showLoading) onStatus('设备刷新完成', 'success');
   } catch (error) {
     onStatus(`刷新设备失败: ${error.message || String(error)}`, 'error');
   } finally {
@@ -196,7 +179,7 @@ export async function setupWirelessConnection({ deviceId, onStatus, onToast, set
     if (result && result.success) {
       if (result.ip) setIpValue(result.ip);
       onStatus(`无线连接已启用! 设备 IP: ${result.ip}`, 'success');
-      onToast({ variant: 'success', title: '已启用无线连接', message: `设备 IP: ${result.ip}（可断开USB后点击“连接”）` });
+      onToast({ variant: 'success', title: '已启用 Wi-Fi', message: '点击「连接」，看到 Wi-Fi 设备后即可拔线。' });
       return;
     }
 
@@ -207,7 +190,7 @@ export async function setupWirelessConnection({ deviceId, onStatus, onToast, set
     onToast({ variant: 'error', title: '启用失败', message: error.message || String(error) });
   } finally {
     setState({ isSettingUpWireless: false });
-    setButtonLoading(false, '启用WiFi');
+    setButtonLoading(false, '启用 Wi-Fi');
   }
 }
 

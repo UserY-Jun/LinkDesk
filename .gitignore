@@ -12,6 +12,7 @@ node_modules/
 
 # Build and dependencies
 /dist/
+/src/dist/
 /build/
 /out/
 *.log
