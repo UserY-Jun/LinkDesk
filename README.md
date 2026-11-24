@@ -30,6 +30,10 @@ npm start
 
 在目标系统上运行 `npm run build`，安装包会输出到 `release/`。启动和打包命令都会先从 `src/js/app.js` 生成渲染进程脚本，因此修改前端时请编辑源码。
 
+推送到 `master` 后，[Release 工作流](https://github.com/UserY-Jun/xxsoft-scrcpy/actions/workflows/release.yml) 会自动构建 Windows x64 安装包和 macOS 安装包（Intel、Apple Silicon 各一份）。登录 GitHub，打开对应运行记录，在 **Artifacts** 下载。也可点击 **Run workflow** 手动构建，手动运行还会打包 Linux。
+
+正式发布时，先更新项目版本并提交，再推送对应的新版本标签（如 `v1.0.1`）。三个平台全部构建成功后，工作流会创建 GitHub Release 并附上安装包。当前工作流未配置 Windows 签名证书或 macOS 公证。
+
 提交源码、运行资源和依赖锁文件 `package-lock.json`。自动生成的 `src/dist/`、安装包目录 `release/` 和本地依赖 `node_modules/` 已由 Git 忽略。
 
 ## 使用方法

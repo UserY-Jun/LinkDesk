@@ -62,6 +62,7 @@
     },
     "mac": {
       "target": "dmg",
+      "artifactName": "LinkDesk-${version}-mac-${arch}.${ext}",
       "category": "public.app-category.developer-tools",
       "extraResources": [
         {
@@ -81,6 +82,7 @@
       ]
     },
     "linux": {
+      "maintainer": "UserY-Jun <UserY-Jun@users.noreply.github.com>",
       "target": [
         "AppImage",
         "deb"
