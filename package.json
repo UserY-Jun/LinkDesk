@@ -1,6 +1,6 @@
 {
   "name": "linkdesk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Android 设备投屏工具",
   "main": "src/main.js",
   "scripts": {
@@ -57,7 +57,9 @@
         {
           "from": "resources/bin/win64",
           "to": "bin/win64",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -73,12 +75,16 @@
         {
           "from": "resources/bin/mac-arm64",
           "to": "bin/mac-arm64",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         },
         {
           "from": "resources/bin/mac-x64",
           "to": "bin/mac-x64",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     },
@@ -98,7 +104,9 @@
         {
           "from": "resources/bin/linux",
           "to": "bin/linux",
-          "filter": ["**/*"]
+          "filter": [
+            "**/*"
+          ]
         }
       ]
     }
