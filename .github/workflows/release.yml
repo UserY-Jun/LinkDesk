@@ -25,7 +25,7 @@ jobs:
           CI: true
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-release
+          name: LinkDesk-windows
           path: release/*.exe
           if-no-files-found: error
 
@@ -44,7 +44,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       - uses: actions/upload-artifact@v4
         with:
-          name: macos-release
+          name: LinkDesk-macos
           path: release/*.dmg
           if-no-files-found: error
 
@@ -64,7 +64,7 @@ jobs:
           CI: true
       - uses: actions/upload-artifact@v4
         with:
-          name: linux-release
+          name: LinkDesk-linux
           path: |
             release/*.AppImage
             release/*.deb

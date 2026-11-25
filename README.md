@@ -1,4 +1,4 @@
-# Android投屏助手 (Scrcpy Electron)
+# LinkDesk
 
 LinkDesk 是基于 [scrcpy](https://github.com/Genymobile/scrcpy) 和 Electron 的 Android 设备工作台。通过 USB 或 Wi-Fi 连接后，可独立使用投屏和文件管理。
 
@@ -11,15 +11,15 @@ LinkDesk 是基于 [scrcpy](https://github.com/Genymobile/scrcpy) 和 Electron �
 
 ### 下载预构建版本
 
-在 [GitHub Releases](https://github.com/UserY-Jun/xxsoft-scrcpy/releases) 查看已发布的安装包。如果没有适合当前系统的版本，可以从源码运行。
+在 [GitHub Releases](https://github.com/UserY-Jun/LinkDesk/releases) 查看已发布的安装包。如果没有适合当前系统的版本，可以从源码运行。
 
 ### 从源码运行
 
 安装 Node.js 和 npm 后执行：
 
 ```bash
-git clone https://github.com/UserY-Jun/xxsoft-scrcpy.git
-cd xxsoft-scrcpy
+git clone https://github.com/UserY-Jun/LinkDesk.git
+cd LinkDesk
 npm ci
 npm start
 ```
@@ -30,7 +30,7 @@ npm start
 
 在目标系统上运行 `npm run build`，安装包会输出到 `release/`。启动和打包命令都会先从 `src/js/app.js` 生成渲染进程脚本，因此修改前端时请编辑源码。
 
-推送到 `master` 后，[Release 工作流](https://github.com/UserY-Jun/xxsoft-scrcpy/actions/workflows/release.yml) 会自动构建 Windows x64 安装包和 macOS 安装包（Intel、Apple Silicon 各一份）。登录 GitHub，打开对应运行记录，在 **Artifacts** 下载。也可点击 **Run workflow** 手动构建，手动运行还会打包 Linux。
+推送到 `master` 后，[Release 工作流](https://github.com/UserY-Jun/LinkDesk/actions/workflows/release.yml) 会自动构建 Windows x64 安装包和 macOS 安装包（Intel、Apple Silicon 各一份）。登录 GitHub，打开对应运行记录，在 **Artifacts** 下载。也可点击 **Run workflow** 手动构建，手动运行还会打包 Linux。
 
 正式发布时，先更新项目版本并提交，再推送对应的新版本标签（如 `v1.0.1`）。三个平台全部构建成功后，工作流会创建 GitHub Release 并附上安装包。当前工作流未配置 Windows 签名证书或 macOS 公证。
 

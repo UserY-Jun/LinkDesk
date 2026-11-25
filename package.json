@@ -1,5 +1,5 @@
 {
-  "name": "scrcpy",
+  "name": "linkdesk",
   "version": "1.0.0",
   "description": "Android 设备投屏工具",
   "main": "src/main.js",
@@ -37,7 +37,7 @@
   },
   "build": {
     "appId": "com.electron.scrcpy",
-    "productName": "Android投屏助手",
+    "productName": "LinkDesk",
     "files": [
       "src/**/*",
       "package.json"
@@ -48,6 +48,7 @@
     },
     "win": {
       "target": "nsis",
+      "artifactName": "LinkDesk-${version}-windows-${arch}.${ext}",
       "extraResources": [
         {
           "from": "resources/scrcpy-server",
@@ -82,6 +83,7 @@
       ]
     },
     "linux": {
+      "artifactName": "LinkDesk-${version}-linux-${arch}.${ext}",
       "maintainer": "UserY-Jun <UserY-Jun@users.noreply.github.com>",
       "target": [
         "AppImage",
